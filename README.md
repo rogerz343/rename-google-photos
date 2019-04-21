@@ -23,16 +23,64 @@ correspond to dates). In those folders are the actual image files and the
 corresponding metadata. For any photo with filename *x*, there should be a file
 called *x.json* in the same directory.
 
-## the scripts
-*rename_photos.py*: this will go through every photo and will
+## rename_photos.py
+High level explanation:
+This script will iterate through the files in the input directory (the directory
+of google photos/albums). For each file, it will rename the file to be a
+timestamp of when the photo was taken, and it will also potentially modify the
+"date taken" metadata of the photo if the current metadata is missing or
+incorrect. All changes are not done in place, i.e. we first copy the file to the
+specified output directory and then change that one.
+
+More detailed explanation:
+First, we need to understand the "Date Taken" tag that Windows puts on files
+when you view a file's properties. The value in this field is taken from the
+photo's exif metadata tags, in the following order (i.e. Windows will use the
+first of the following whose value is not missing).
+
+1. `EXIF:DateTimeOriginal`
+2. `IPTC:DateCreated + IPTC:TimeCreated`
+3. `XMP:CreateDate`
+4. `EXIF:CreateDate`
+5. `XMP:DateTimeOriginal`
+
+For this script, we'll just use EXIF:DateTimeOriginal and not care about
+date modified, date created, etc.
+
+This script will go through every photo and will first compare the
+"photoTakenTime" field in the .json file to the DateTimeOriginal field in the
+photo's metadata. If the "date taken" exif data is missing, or if the datetimes
+("photoTakenTime" and DateTimeOriginal) are not within 12 hours of each other,
+then we'll consider the "photoTakenTime" to be the "true" datetime. Otherwise,
+we'll consider the exif data as the "true" datetime. Note that:
+- "photoTakenTime" from the google photos .json document uses UTC with no offset
+- the exif metadata does not have a timezone associated with it, so we'll
+consider it local time.
+
+We decided in the end to always output local times (with no associated
+timezone). Since most photos do have exif metadata and since this
+metadata uses local time ("local" to whenever/wherever the photo was taken),
+most photos will have accurate filenames. However, if the exif data is missing
+(in this case, we rely on google photos's datetime), the resulting timestamp
+might be off by up to a few hours. Oh well.
+
+*Note*: EXIF tags do actually include a timezone offset in case you want to
+compute the time in UTC, but using that is way too much work for this small
+project.
+
+For each photo, the script will
 1. Rename the file to be a timestamp of when the photo was taken, in the format
 YYYYMMDD_hhmmss_X, where X is a number given to the photo (to resolve conflicts
-where more than 1 photo was taken in the same second). Note that it will NOT
-use the photo's "date taken" metadata information, but instead will use the
-"photoTakenTime" field which is located in the corresponding .json file.
-2. Edit the "date taken" exif metadata on the actual image file; the script will
-only edit the "date taken" metadata if (i) the metadata is missing, or (ii) the
-difference between the "date taken" metadata datetime and the "photoTakenTime"
-datetime is more than 12 hours. None of these edits are done in-place; all
-files will be copied to the specified output directory. Also, note that the
-current implementation saves times in UTC-4:00 (which is EDT timezone).
+where more than 1 photo was taken in the same second).
+2. Potentially edit the "date taken" exif metadata to be the "true" date, if
+needed.
+
+All of the above applies to recognized image formats. Recognized video formats
+will simply be copied over with the Google Photos timestamp as the filename
+(the timestamp is still under "photoTakenTime" in the .json file).
+
+If the file is not recognized as an image, video, or .json file, then the
+script skips it (and prints the name of the unrecognized file).
+
+All edits are done on copies of the file, which will be output in the specified
+output directory.
