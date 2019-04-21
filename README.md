@@ -2,13 +2,13 @@
 scripts that modify files downloaded from google photos
 
 ## some background
-Uploading images to Google Photos provides many benefits, such as automatic face
-recognition, location tagging, and object tagging. You can also change
-information about when and where the photo was taken, and add a description to
-each photo. However, modifying these fields doesn't change the metadata that is
-found in the originally uploaded photo. Thus, downloading all of your google
-photos by simply adding them to your Google Drive won't preserve
-some of the new information. The scripts in this repo should help fix that.
+When you upload an image to Google Photos, you can edit metadata such as
+location, date/time taken, etc. However, this information is not modified in
+the original source file. Instead, all images uploaded to Google Photos have a
+corresponding .json file, which contains information such as GPS coordinates,
+a timestamp of when the photo was taken, etc. Thus, when you download your
+images from Google Photos, you get the original image files (without any manual
+adjustments to metadata).
 
 ## getting your photos and information
 Google has a service called "Takeout"
@@ -21,7 +21,7 @@ It will be assumed that (after downloading your photos with Takeout), you will
 have a folder called "Google Photos". In it are many folders (most of them
 correspond to dates). In those folders are the actual image files and the
 corresponding metadata. For any photo with filename *x*, there should be a file
-called *x.json* in the same directory.
+(with the metadata) called *x.json* in the same directory.
 
 ## rename_photos.py
 ### High level explanation
