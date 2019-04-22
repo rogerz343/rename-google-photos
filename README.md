@@ -24,6 +24,13 @@ corresponding metadata. For any photo with filename *x*, there should be a file
 (with the metadata) called *x.json* in the same directory.
 
 ## rename_photos.py
+### Usage
+1. Set the `input_dir` and `output_dir` variables at the top of the file to
+point to the correct/valid directories.
+2. To start, simply do `python rename_photos.py`. I also recommend saving the
+standard out stream to see if anything went wrong, for example
+`python rename_photos.py > log.txt`.
+
 ### High level explanation
 This script will iterate through the files in the input directory (the directory
 of google photos/albums). For each photo/video, it will rename the file to be a
