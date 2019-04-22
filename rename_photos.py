@@ -49,9 +49,10 @@ for f in os.listdir(input_dir):
     for filename in subdir_files:
         source_filepath = os.path.join(subdir_path, filename)
         root, ext = os.path.splitext(filename)
-        if ext.lower() not in photo_extensions \
-            and ext.lower() not in video_extensions:
-            if ext.lower() != '.json':
+        ext = ext.lower()
+        if ext not in photo_extensions \
+            and ext not in video_extensions:
+            if ext != '.json':
                 print('[skipping] unrecognized file format: ' + str(source_filepath))
         try:
             with open(os.path.join(source_filepath + '.json')) as data:
@@ -63,8 +64,8 @@ for f in os.listdir(input_dir):
                 true_dt_str = google_dt
 
                 # files with no exif data, e.g. videos or .png files
-                if ext.lower() in video_extensions \
-                    or ext.lower() == '.png':
+                if ext in video_extensions \
+                    or ext == '.png':
                     # resolve filename conflicts by appending with a numeric id
                     counter = 1
                     true_dt_str = true_dt.strftime('%Y%m%d_%H%M%S')
@@ -91,7 +92,8 @@ for f in os.listdir(input_dir):
                     else:
                         true_dt = exif_dt
                 except piexif._exceptions.InvalidImageDataError:
-                    print('[skipping] bad/no exif data: ' + source_filepath)
+                    print('[warning] some error in reading exif data for '
+                        + source_filepath + '. using google photos data.')
 
                 # resolve filename conflicts by appending with a numeric id
                 counter = 1
