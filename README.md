@@ -6,9 +6,8 @@ When you upload an image to Google Photos, you can edit metadata such as
 location, date/time taken, etc. However, this information is not modified in
 the original source file. Instead, all images uploaded to Google Photos have a
 corresponding .json file, which contains information such as GPS coordinates,
-a timestamp of when the photo was taken, etc. Thus, when you download your
-images from Google Photos, you get the original image files (without any manual
-adjustments to metadata).
+a timestamp of when the photo was taken, etc. When you download your
+images from Google Photos, you get the original image files that you uploaded.
 
 ## getting your photos and information
 Google has a service called "Takeout"
@@ -36,8 +35,10 @@ This script will iterate through the files in the input directory (the directory
 of google photos/albums). For each photo/video, it will rename the file to be a
 timestamp of when the photo was taken, and it will also potentially modify the
 "date taken" metadata of the photo if the current metadata is missing or
-incorrect. All changes are not done in place, i.e. we first copy the file to the
-specified output directory and then change that one.
+incorrect. Changes are not done in place, i.e. we first copy the file to the
+specified output directory and then modify the copy. You might still want to
+keep yet another separate backup of your files, in case something goes wrong
+with this script.
 
 ### More detailed explanation
 First, we need to understand the "Date Taken" tag that Windows puts on files
@@ -59,12 +60,12 @@ If the file is recognized as a photo with exifdata: the script will first
 compare the "photoTakenTime" field in the .json file to the DateTimeOriginal
 field in the photo's exif metadata. If the DateTimeOriginal exif tag is missing,
 or if the timestamps (the "photoTakenTime" and DateTimeOriginal) are not within
-12 hours of each other, then we'll consider the "photoTakenTime" to be the
+24 hours of each other, then we'll consider the "photoTakenTime" to be the
 "true" datetime. Otherwise, we'll consider the exif data as the "true" datetime.
 Note that:
 - "photoTakenTime" from the google photos .json document uses UTC with no offset
-- the exif metadata does not have a timezone associated with it, so we'll
-consider it local time.
+- the exif DateTimeOriginal field is usually local (in reference to wherever
+the photo was taken) time.
 
 The script will always output local times (with no associated timezone). Since
 most photos do have exif metadata and since this metadata uses local time
@@ -74,8 +75,7 @@ case, we rely on google photos's datetime), the resulting timestamp might be off
 by up to a few hours. Oh well.
 
 *Note*: EXIF tags do actually include a timezone offset in case you want to
-compute the time in UTC, but using that is way too much work for this small
-project.
+compute the time in UTC, but it's probably not necessary.
 
 For each photo, the script will
 1. Rename the file to be a timestamp of when the photo was taken, in the format
@@ -90,7 +90,4 @@ files) will simply be copied over with the Google Photos timestamp (the
 "photoTakenTime" field in the .json file) as the filename.
 
 If the file is not recognized as an image, video, or .json file, then the
-script skips it (and prints a "\[skipping\]" warning).
-
-All edits are done on copies of the file, which will be output in the specified
-output directory.
+script skips it without copying (and prints a "\[skipping\]" warning).
