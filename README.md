@@ -1,4 +1,4 @@
-# google-photos-tool
+# rename-photos
 scripts that modify files downloaded from google photos
 
 ## some background
