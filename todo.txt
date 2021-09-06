@@ -1,0 +1,20 @@
+google photos todo
+
+CODING
+
+- make sure this can't happen: x_1.mp4 and x_1.jpg both exist
+- check timezone metadata
+  - default to US/Eastern if before 7/22/2019
+  - default to US/Central if on or after 7/22/2019
+- figure out edits made within google photos (original vs edited)
+
+TESTING
+
+- videos seem brOken? make sure they work
+- investigate (20171109_222734_1.png, 20171109_222734_1.jpg)
+- investigate 20180114_233930_1.jpg definitely not correct time (not using google time?)
+- investigate 20181127: night sight version missing
+- investigate lle photos 20190303_164910_1.png
+
+> most problems prob come from rule in program "if date is more than X off, then
+  the google photos date is prob correct"
